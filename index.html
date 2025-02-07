@@ -6,51 +6,31 @@
     <title>JavaScript Deep Dive Study</title>
   </head>
   <body>
-    <button>Click me</button>
-    <pre>일반 클릭 이벤트 카운터 <span class="normal-msg">0</span></pre>
-    <pre>디바운스 클릭 이벤트 카운터 <span class="debounce-msg">0</span></pre>
-    <pre>스로틀 클릭 이벤트 카운터 <span class="throttle-msg">0</span></pre>
+    <input type="text" />
+    <div class="msg"></div>
     <script>
-      const $button = document.querySelector('button');
-      const $normalMsg = document.querySelector('.normal-msg');
-      const $debounceMsg = document.querySelector('.debounce-msg');
-      const $throttleMsg = document.querySelector('.throttle-msg');
+      const $input = document.querySelector('input');
+      const $msg = document.querySelector('.msg');
 
       const debounce = (callback, delay) => {
         let timerId;
+        // debounce 함수는 timerId를 기억하는 클로저를 반환한다.
         return (...args) => {
+          // delay가 경과하기 이전에 이벤트가 발생하면 이전 타이머를 취소하고 새로운 타이머를 재설정한다.
+          // 따라서 delay보다 짧은 간격으로 이벤트가 발생하면 callback은 호출되지 않는다.
           if (timerId) clearTimeout(timerId);
           timerId = setTimeout(callback, delay, ...args);
         };
       };
 
-      const throttle = (callback, delay) => {
-        let timerId;
-        return (...args) => {
-          if (timerId) return;
-          timerId = setTimeout(() => {
-            callback(...args);
-            timerId = null;
-          }, delay);
-        };
-      };
-
-      $button.addEventListener('click', () => {
-        $normalMsg.textContent = +$normalMsg.textContent + 1;
-      });
-
-      $button.addEventListener(
-        'click',
-        debounce(() => {
-          $debounceMsg.textContent = +$debounceMsg.textContent + 1;
-        }, 500)
-      );
-
-      $button.addEventListener(
-        'click',
-        throttle(() => {
-          $throttleMsg.textContent = +$throttleMsg.textContent + 1;
-        }, 500)
+      // debounce 함수가 반환하는 클로저가 이벤트 핸들러로 등록된다.
+      // 300ms보다 짧은 간격으로 input 이벤트가 발생하면 debounce 함수의 콜백 함수는
+      // 호출되지 않다가 300ms 동안 input 이벤트가 더 이상 발생하지 않으면 한 번만 호출된다.
+      $input.addEventListener(
+        'input',
+        debounce((e) => {
+          $msg.textContent = e.target.value;
+        }, 300)
       );
     </script>
   </body>
